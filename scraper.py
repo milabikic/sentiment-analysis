@@ -25,51 +25,43 @@ def get_links():
     return links
 
 
-
-
 def get_review_data(url):
     """Funkcija vraća sljedeće sa određenog URL-a u obliku dictionary: author, date, score, impression, review."""
     review_dict = {}
     response = requests.get(url)
     html = response.content
     soup = bs(html, "lxml")
-
     print("Fetching review from " + url)
 
-    # find author
     author = ""
     author_elem = soup.find("a", {"class", "tdb-author-name"})
     if author_elem is not None:
         author = author_elem.getText()
     review_dict["author"] = author
 
-    # find date
     time = soup.find("time", {"class": "entry-date updated td-module-date"})
     date = time.getText()
     review_dict["date"] = date
 
-    # find overall score
     score_elem = soup.find("div", {"class": "td-review-final-score"})
     score = ""
     if score_elem is not None:
         score = score_elem.getText()
     review_dict["score"] = score
 
-    # find first impression
     impression = ""
     impression_elem = soup.find("div", {"class": "td-review-summary-content"})
     if impression_elem is not None:
         impression = impression_elem.getText()
     review_dict["impression"] = impression
 
-    # find review
     div = soup.find("div", {"data-td-block-uid": "tdi_68"}).find("div", {"class": "tdb-block-inner td-fix-index"})
     review = ""
     for child in div.findChildren(recursive=False):
-        if child.name == 'p':
-            review += child.getText(strip=True).replace('<br>', '').replace('</br>', '')
+        if child.name == "p":
+            review += child.getText(strip=True).replace("<br>", "").replace("</br>", "")
 
-        if child.name == 'iframe':
+        if child.name == "iframe":
             break
     review = "[" + review + "]"
     review_dict["review"] = review
@@ -80,7 +72,7 @@ def get_review_data(url):
 
 with open("osvrti_opj.tsv", "w", newline = "", encoding = "utf-8") as review_file:
     review_writer = csv.writer(review_file, delimiter='\t', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    review_writer.writerow(['review', 'overall_score', 'first_impression', 'review_date', 'reviewer', 'home_url'])
+    review_writer.writerow(["review", "overall_score", "first_impression", "review_date", "reviewer", "home_url"])
 
     links = get_links()
     print("Found " + str(len(links)) + " links")
